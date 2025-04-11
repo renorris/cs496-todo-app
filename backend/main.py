@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from routes.user import user_router
-from routes.list import list_router
+from .routes.user import user_router
+from .routes.list import list_router
 from .database import create_tables
 
 app = FastAPI()

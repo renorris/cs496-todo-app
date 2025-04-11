@@ -5,8 +5,8 @@ from sqlmodel import Session
 from pydantic import BaseModel
 
 from .middleware import get_current_user
-from database import get_session
-from models import list, list_access
+from ..database import get_session
+from ..models import list, list_access
 
 list_router = APIRouter()
 
