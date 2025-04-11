@@ -2,12 +2,12 @@ from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
+from ..models.user import User
+from ..database import get_session
 
-from utils.token import generate_jwt_token
-from models.user import User
-from database import get_session
-from utils.token import generate_registration_token, decrypt_registration_token
-from utils.email import send_confirmation_email
+from ..utils.token import generate_jwt_token
+from ..utils.token import generate_registration_token, decrypt_registration_token
+from ..utils.email import send_confirmation_email
 from pydantic import BaseModel
 import bcrypt
 import datetime

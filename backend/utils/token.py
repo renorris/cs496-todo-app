@@ -1,12 +1,10 @@
 import json
 import os
-from uuid import UUID
-
 import jwt
-
+from uuid import UUID
 from datetime import timedelta, datetime, UTC
 from jose import jwe
-from models.user import User
+from ..models.user import User
 
 def generate_registration_token(email: str, password: str, first_name: str, last_name: str) -> str:
     """Generate and encrypt a registration token."""
