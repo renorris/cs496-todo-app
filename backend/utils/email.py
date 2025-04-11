@@ -18,3 +18,5 @@ def send_confirmation_email(email: str, reg_token_ciphertext: str):
     }
     resend.api_key = os.environ["RESEND_API_KEY"]
     resend.Emails.send(params)
+
+    return
