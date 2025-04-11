@@ -1,5 +1,6 @@
 from sqlmodel import create_engine, SQLModel, Session
-from models.user import User
+
+from models import user, list, list_access, task
 
 # Create the database engine
 engine = create_engine("postgresql://localhost:5432/todoapp", echo=True)

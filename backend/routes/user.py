@@ -4,16 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from utils.token import generate_jwt_token
-from ..models.user import User
-from ..database import get_session
-from ..utils.token import generate_registration_token, decrypt_registration_token
-from ..utils.email import send_confirmation_email
+from models.user import User
+from database import get_session
+from utils.token import generate_registration_token, decrypt_registration_token
+from utils.email import send_confirmation_email
 from pydantic import BaseModel
 import bcrypt
 import datetime
 import uuid
 
-router = APIRouter()
+user_router = APIRouter()
 
 class CreateUserBody(BaseModel):
     email: str
@@ -21,7 +21,7 @@ class CreateUserBody(BaseModel):
     first_name: str
     last_name: str
 
-@router.post("/user/create")
+@user_router.post("/user/create")
 def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)):
     # Check if the email is already in use
     email: str = reqBody.email
@@ -43,7 +43,7 @@ def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)
 
     return {"message": "Confirmation email sent"}
 
-@router.get("/user/confirm/{regTokenCiphertext}")
+@user_router.get("/user/confirm/{regTokenCiphertext}")
 def confirm_user(regTokenCiphertext: str, session: Session = Depends(get_session)):
     # Decrypt the registration token
     try:
@@ -82,7 +82,7 @@ class LoginUserBody(BaseModel):
     email: str
     password: str
 
-@router.post("/user/login")
+@user_router.post("/user/login")
 def login_user(req_body: LoginUserBody, session: Session = Depends(get_session)):
     email: str = req_body.email
     rows = session.query(User).filter(User.email == email)
