@@ -2,7 +2,7 @@ import json
 import os
 import jwt
 from uuid import UUID
-from datetime import timedelta, datetime, UTC
+from datetime import timedelta, datetime, timezone
 from jose import jwe
 from ..models.user import User
 
@@ -28,18 +28,17 @@ def decrypt_registration_token(reg_token_ciphertext: str) -> dict:
 def generate_jwt_token(user: User, expires_delta: timedelta, token_type: str) -> str:
     data = dict()
     data['token_type'] = token_type
-
     data['uuid'] = str(user.uuid)
     data['email'] = user.email
     data['first_name'] = user.first_name
     data['last_name'] = user.last_name
 
     # Add expiry time
-    expire = datetime.now(UTC) + expires_delta
-    data['exp'] = expire
+    data['exp'] = datetime.now(timezone.utc) + expires_delta
 
     secret_key = os.getenv("SECRET_KEY")
     encoded_jwt = jwt.encode(data, secret_key, algorithm="HS256")
+
     return encoded_jwt
 
 class TokenClaims:

@@ -15,7 +15,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        secret_key = os.getenv("SECRET_KEY")
+        print("SECRET --> ")
+        print(secret_key)
+        payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         return payload
     except jwt.PyJWTError:
         raise credentials_exception
