@@ -124,3 +124,58 @@ def delete_list(list_uuid: str, session: Session = Depends(get_session), current
     session.commit()
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+# Add list access for another user
+@list_router.put("/list/{list_uuid}/access/{other_user_uuid}")
+def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
+    user_uuid = uuid.UUID(current_user['uuid'])
+    list_uuid_obj = uuid.UUID(list_uuid)
+    other_user_uuid_obj = uuid.UUID(other_user_uuid)
+
+    # Check if current_user has access to list_uuid
+    la_current = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == user_uuid).first()
+    if not la_current:
+        raise HTTPException(status_code=404, detail="List not found")
+
+    # Check if other_user exists
+    other_user = session.query(User).filter(User.uuid == other_user_uuid_obj).first()
+    if not other_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check if other_user already has access
+    la_other = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == other_user_uuid_obj).first()
+    if la_other:
+        return {"message": "User already has access"}, status.HTTP_200_OK
+
+    # Create new ListAccess
+    new_la = list_access.ListAccess()
+    new_la.uuid = uuid.uuid4()
+    new_la.list_uuid = list_uuid_obj
+    new_la.owner_uuid = other_user_uuid_obj
+    session.add(new_la)
+    session.commit()
+
+    return {"message": "Access granted"}, status.HTTP_201_CREATED
+
+# Remove list access for another user
+@list_router.delete("/list/{list_uuid}/access/{other_user_uuid}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_list_access(list_uuid: str, other_user_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
+    user_uuid = uuid.UUID(current_user['uuid'])
+    list_uuid_obj = uuid.UUID(list_uuid)
+    other_user_uuid_obj = uuid.UUID(other_user_uuid)
+
+    # Check if current_user has access to list_uuid
+    la_current = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == user_uuid).first()
+    if not la_current:
+        raise HTTPException(status_code=404, detail="List not found")
+
+    # Find ListAccess for other_user
+    la_other = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == other_user_uuid_obj).first()
+    if not la_other:
+        raise HTTPException(status_code=404, detail="User does not have access")
+
+    # Delete ListAccess
+    session.delete(la_other)
+    session.commit()
+
+    # No return needed, will return 204
