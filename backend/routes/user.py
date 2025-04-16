@@ -21,7 +21,7 @@ class CreateUserBody(BaseModel):
     first_name: str
     last_name: str
 
-@user_router.post("/user/create")
+@user_router.post("/api/user/create")
 def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)):
     # Check if the email is already in use
     email: str = reqBody.email
@@ -43,7 +43,7 @@ def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)
 
     return {"message": "Confirmation email sent"}
 
-@user_router.get("/user/confirm/{regTokenCiphertext}")
+@user_router.get("/api/user/confirm/{regTokenCiphertext}")
 def confirm_user(regTokenCiphertext: str, session: Session = Depends(get_session)):
     # Decrypt the registration token
     try:
@@ -82,7 +82,7 @@ class LoginUserBody(BaseModel):
     email: str
     password: str
 
-@user_router.post("/user/login")
+@user_router.post("/api/user/login")
 def login_user(req_body: LoginUserBody, session: Session = Depends(get_session)):
     email: str = req_body.email
     rows = session.query(User).filter(User.email == email)
