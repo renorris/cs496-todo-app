@@ -9,10 +9,12 @@ dependencies = [
     "fastapi[standard]>=0.115.12",
     "psycopg2-binary>=2.9.10",
     "pyjwt>=2.10.1",
+    "python-dotenv>=1.1.0",
     "python-jose>=3.4.0",
     "resend>=2.7.0",
     "routes>=2.5.1",
     "ruff>=0.11.2",
     "sqlalchemy>=2.0.40",
     "sqlmodel>=0.0.24",
+    "uvicorn>=0.34.0",
 ]

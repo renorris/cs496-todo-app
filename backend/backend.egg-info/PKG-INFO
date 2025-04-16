@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: backend
+Version: 0.1.0
+Summary: FastAPI backend
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi[standard]
+Requires-Dist: uvicorn[standard]
+Requires-Dist: sqlalchemy
+Requires-Dist: sqlmodel
+Requires-Dist: python-jose
+Requires-Dist: bcrypt
+Requires-Dist: pyjwt
+Requires-Dist: psycopg2-binary
+Requires-Dist: resend
