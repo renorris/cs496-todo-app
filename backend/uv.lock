@@ -33,12 +33,14 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "psycopg2-binary" },
     { name = "pyjwt" },
+    { name = "python-dotenv" },
     { name = "python-jose" },
     { name = "resend" },
     { name = "routes" },
     { name = "ruff" },
     { name = "sqlalchemy" },
     { name = "sqlmodel" },
+    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -47,12 +49,14 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pyjwt", specifier = ">=2.10.1" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "python-jose", specifier = ">=3.4.0" },
     { name = "resend", specifier = ">=2.7.0" },
     { name = "routes", specifier = ">=2.5.1" },
     { name = "ruff", specifier = ">=0.11.2" },
     { name = "sqlalchemy", specifier = ">=2.0.40" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
+    { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 
 [[package]]
