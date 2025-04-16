@@ -1,10 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from .routes.user import user_router
 from .routes.list import list_router
 from .routes.task import task_router
 from .database import create_tables
 
 app = FastAPI()
+
+# Allow frontend to talk to backend 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # frontend dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register the startup event to create tables
 @app.on_event("startup")
