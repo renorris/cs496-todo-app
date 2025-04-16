@@ -12,11 +12,6 @@ def on_startup():
     create_tables()
 
 # Include routers from routes
-app.include_router(user_router)
-app.include_router(list_router)
-app.include_router(task_router)
-
-# Root endpoint
-@app.get("/")
-def read_root():
-    return {"hello": "world"}
+app.include_router(user_router, tags=["User"])
+app.include_router(list_router, tags=["List"])
+app.include_router(task_router, tags=["Task"])

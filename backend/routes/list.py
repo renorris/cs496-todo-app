@@ -14,7 +14,7 @@ class CreateListBody(BaseModel):
     title: str
     description: str
 
-@list_router.post("/list/create")
+@list_router.post("/api/list/create")
 def create_list(reqBody: CreateListBody, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     # Create a new list with its details
     l = list.List()
@@ -43,7 +43,7 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
     }
 
 # Get all lists
-@list_router.get("/list")
+@list_router.get("/api/list")
 def get_lists(session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_accesses = session.query(ListAccess).filter(ListAccess.owner_uuid == user_uuid).all()
@@ -60,7 +60,7 @@ def get_lists(session: Session = Depends(get_session), current_user=Depends(get_
     return lists
 
 # Get single list by UUID
-@list_router.get("/list/{list_uuid}")
+@list_router.get("/api/list/{list_uuid}")
 def get_list(list_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
@@ -78,7 +78,7 @@ def get_list(list_uuid: str, session: Session = Depends(get_session), current_us
     }
 
 # Update list
-@list_router.put("/list/{list_uuid}")
+@list_router.put("/api/list/{list_uuid}")
 def update_list(list_uuid: str, reqBody: CreateListBody, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
@@ -100,7 +100,7 @@ def update_list(list_uuid: str, reqBody: CreateListBody, session: Session = Depe
     }
 
 # Delete list
-@list_router.delete("/list/{list_uuid}", status_code=status.HTTP_204_NO_CONTENT)
+@list_router.delete("/api/list/{list_uuid}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_list(list_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
@@ -126,7 +126,7 @@ def delete_list(list_uuid: str, session: Session = Depends(get_session), current
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # Add list access for another user
-@list_router.put("/list/{list_uuid}/access/{other_user_uuid}")
+@list_router.put("/api/list/{list_uuid}/access/{other_user_uuid}")
 def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
@@ -158,7 +158,7 @@ def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Dep
     return {"message": "Access granted"}, status.HTTP_201_CREATED
 
 # Remove list access for another user
-@list_router.delete("/list/{list_uuid}/access/{other_user_uuid}", status_code=status.HTTP_204_NO_CONTENT)
+@list_router.delete("/api/list/{list_uuid}/access/{other_user_uuid}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_list_access(list_uuid: str, other_user_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
