@@ -22,6 +22,40 @@ export default function LoginPage() {
     router.push("/dashboard")
   }
 
+  //UNCOMMENT BELOW ONCE WE GET THE FRONTEND AND BACKEND CONNECTED !! commenting out for now 
+  // so we can still login with mock values and view the rest of the pages like dashboard - ELLA
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+
+  //   try {
+  //     const response = await fetch("http://localhost:8000/user/login", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email,
+  //         password,
+  //       }),
+  //     })
+
+  //     if (!response.ok) {
+  //       throw new Error("Login failed")
+  //     }
+
+  //     const data = await response.json()
+
+  //     if (data.access_token) {
+  //       localStorage.setItem("access_token", data.access_token)
+  //     }
+
+  //     router.push("/dashboard")
+  //   } catch (error) {
+  //     console.error("Login error:", error)
+  //     alert("Invalid login credentials.")
+  //   }
+  // }
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left side - Login form */}
@@ -66,7 +100,7 @@ export default function LoginPage() {
               </Button>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="text-primary hover:underline">
+                <a href="/signup" className="text-primary hover:underline">
                   Sign up
                 </a>
               </div>
