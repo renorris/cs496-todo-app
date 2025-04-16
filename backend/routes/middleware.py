@@ -16,8 +16,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         secret_key = os.getenv("SECRET_KEY")
-        print("SECRET --> ")
-        print(secret_key)
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         return payload
     except jwt.PyJWTError:
