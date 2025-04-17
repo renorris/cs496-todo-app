@@ -18,3 +18,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Run the application using uv to ensure the correct environment
 # CMD ["uv", "run", "fastapi", "dev"]
 CMD ["uv", "run", "fastapi", "dev", "main.py", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
