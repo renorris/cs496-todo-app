@@ -1,9 +1,9 @@
+import os
 from sqlmodel import create_engine, SQLModel, Session
-
 from .models import user, list, list_access, task
 
 # Create the database engine
-engine = create_engine("postgresql://localhost:5432/todoapp", echo=True)
+engine = create_engine(f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@db:5432/{os.environ['POSTGRES_DB']}", echo=True)
 
 def create_tables():
     """Create all database tables based on SQLModel metadata."""

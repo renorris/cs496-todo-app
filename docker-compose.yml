@@ -5,7 +5,7 @@ services:
     restart: always
     env_file: .env
     expose:
-      - "5432:5432/tcp"
+      - "5432/tcp"
     networks:
       - todoappnet
   
@@ -14,13 +14,11 @@ services:
       context: ./backend
     hostname: fastapi
     restart: always
-    env_file: ./backend/env
+    env_file: .env
     expose:
-      - "8000:8000/tcp"
+      - "8000/tcp"
     networks:
       - todoappnet
-
-  
 
   caddy:
     image: docker.io/caddy:latest

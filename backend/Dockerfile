@@ -16,4 +16,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
 # Run the application using uv to ensure the correct environment
-CMD ["uv", "run", "fastapi", "dev"]
+CMD ["uv", "run", "fastapi", "dev", "--host", "0.0.0.0"]
