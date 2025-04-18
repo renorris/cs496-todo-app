@@ -23,9 +23,9 @@ def on_startup():
     create_tables()
 
 # Include routers from routes
-app.include_router(user_router)
-app.include_router(list_router)
-app.include_router(task_router)
+app.include_router(user_router, tags=["user"], prefix="/api/user")
+app.include_router(list_router, tags=["list"], prefix="/api/list")
+app.include_router(task_router, tags=["task"], prefix="/api/list/{list_uuid}/task")
 
 # Root endpoint
 @app.get("/")

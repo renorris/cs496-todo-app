@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from ..models.user import User
 from ..database import get_session
@@ -21,7 +22,7 @@ class CreateUserBody(BaseModel):
     first_name: str
     last_name: str
 
-@user_router.post("/api/user/create")
+@user_router.post("/create")
 def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)):
     # Check if the email is already in use
     email: str = reqBody.email
@@ -43,7 +44,7 @@ def create_user(reqBody: CreateUserBody, session: Session = Depends(get_session)
 
     return {"message": "Confirmation email sent"}
 
-@user_router.get("/api/user/confirm/{regTokenCiphertext}")
+@user_router.get("/confirm/{regTokenCiphertext}")
 def confirm_user(regTokenCiphertext: str, session: Session = Depends(get_session)):
     # Decrypt the registration token
     try:
@@ -73,16 +74,20 @@ def confirm_user(regTokenCiphertext: str, session: Session = Depends(get_session
     access_token = generate_jwt_token(user, timedelta(0, 60 * 15), "access")
     refresh_token = generate_jwt_token(user, timedelta(1), "refresh")
 
-    return {
-        'access_token': access_token,
-        'refresh_token': refresh_token
-    }
+    # return {
+    #     'access_token': access_token,
+    #     'refresh_token': refresh_token
+    # }
+    response = RedirectResponse(url="http://localhost:3000/?confirmed=true", status_code=302)
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    return response
 
 class LoginUserBody(BaseModel):
     email: str
     password: str
 
-@user_router.post("/api/user/login")
+@user_router.post("/login")
 def login_user(req_body: LoginUserBody, session: Session = Depends(get_session)):
     email: str = req_body.email
     rows = session.query(User).filter(User.email == email)

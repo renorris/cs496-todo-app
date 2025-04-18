@@ -23,7 +23,7 @@ class UpdateTaskBody(BaseModel):
     done: Optional[bool] = None
 
 # Define the router with prefix
-task_router = APIRouter(prefix="/api/list/{list_uuid}/task")
+task_router = APIRouter()
 
 # Create a new task
 @task_router.post("/")
