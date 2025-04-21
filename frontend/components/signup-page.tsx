@@ -96,13 +96,24 @@ export default function SignupPage() {
               <p className="text-sm text-center text-red-500">{message}</p>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col space-y-2">
             <Button type="submit" className="w-full">
               Sign Up
-            </Button>
+              </Button>
           </CardFooter>
         </form>
       </Card>
+      <div className="absolute bottom-4 right-4">
+         <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/")}
+            className="text-white hover:bg-orange-600"
+            style={{ backgroundColor: "oklch(14.7% 0.004 49.25)" }}
+          >
+            Back to Home
+        </Button>
+      </div>
     </div>
   )
 }
