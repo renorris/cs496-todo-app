@@ -14,13 +14,11 @@ services:
       context: ./backend
     hostname: fastapi
     restart: always
-    env_file: ./backend/env
+    env_file: .env
     expose:
       - "8000:8000/tcp"
     networks:
-      - todoappnet
-
-  
+      - todoappnet  
 
   caddy:
     image: docker.io/caddy:latest
@@ -31,6 +29,8 @@ services:
       - "443:443/tcp"
     volumes:
       - './Caddyfile:/etc/caddy/Caddyfile'
+      - './caddy/config:/config'
+      - './caddy/data:/data'
     networks:
       - todoappnet
 
