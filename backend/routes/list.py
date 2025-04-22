@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from backend.models.user import User
+from ..models.user import User
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 from pydantic import BaseModel
