@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from backend.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 from pydantic import BaseModel
@@ -46,10 +47,10 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
 @list_router.get("/")
 def get_lists(session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
-    list_accesses = session.query(ListAccess).filter(ListAccess.owner_uuid == user_uuid).all()
+    list_accesses = session.query(list_access.ListAccess).filter(list_access.ListAccess.owner_uuid == user_uuid).all()
     lists = []
     for la in list_accesses:
-        l = session.query(List).filter(List.uuid == la.list_uuid).first()
+        l = session.query(list.List).filter(list.List.uuid == la.list_uuid).first()
         if l:
             lists.append({
                 "uuid": str(l.uuid),
@@ -64,10 +65,10 @@ def get_lists(session: Session = Depends(get_session), current_user=Depends(get_
 def get_list(list_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
-    la = session.query(ListAccess).filter(ListAccess.list_uuid == list_uuid_obj, ListAccess.owner_uuid == user_uuid).first()
+    la = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == user_uuid).first()
     if not la:
         raise HTTPException(status_code=404, detail="List not found")
-    l = session.query(List).filter(List.uuid == list_uuid_obj).first()
+    l = session.query(list.List).filter(list.List.uuid == list_uuid_obj).first()
     if not l:
         raise HTTPException(status_code=404, detail="List not found")
     return {
@@ -82,10 +83,10 @@ def get_list(list_uuid: str, session: Session = Depends(get_session), current_us
 def update_list(list_uuid: str, reqBody: CreateListBody, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
-    la = session.query(ListAccess).filter(ListAccess.list_uuid == list_uuid_obj, ListAccess.owner_uuid == user_uuid).first()
+    la = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == user_uuid).first()
     if not la:
         raise HTTPException(status_code=404, detail="List not found")
-    l = session.query(List).filter(List.uuid == list_uuid_obj).first()
+    l = session.query(list.List).filter(list.List.uuid == list_uuid_obj).first()
     if not l:
         raise HTTPException(status_code=404, detail="List not found")
     l.title = reqBody.title
