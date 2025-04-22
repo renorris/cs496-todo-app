@@ -25,7 +25,7 @@ export default function SignupPage() {
     e.preventDefault()
 
     try {
-      const response = await fetch("http://localhost:8000/api/user/create", {
+      const response = await fetch("https://todoapp.reesenorr.is/api/user/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
