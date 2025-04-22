@@ -44,28 +44,54 @@ const mockLists = [
   },
 ]
 
-// currently adds the new list to the mock values list above! 
+// currently errors out due to no auth
 export function ListsOverview() {
   const router = useRouter()
   const [lists, setLists] = useState(mockLists)
   const [showForm, setShowForm] = useState(false)
   const [newTitle, setNewTitle] = useState("")
-  const [newDueDate, setNewDueDate] = useState("")
+  const [newDescription, setNewDescription] = useState("")
 
-  const handleCreateList = () => {
-    if (!newTitle || !newDueDate) return
-    const newList = {
-      id: crypto.randomUUID(),
-      title: newTitle,
-      createdAt: new Date().toISOString(),
-      dueDate: newDueDate,
-      totalTasks: 0,
-      completedTasks: 0,
+  const handleCreateList = async (e: React.FormEvent) => {
+    if (!newTitle || !newDescription) return
+    e.preventDefault()
+
+    let data
+
+    try {
+      const response = await fetch("http://localhost:8000/api/list/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // include cookiess
+        body: JSON.stringify({
+          title: newTitle,
+          description:newDescription
+        }),
+      })
+
+      data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to create new list")
+      }
+
+
+      router.push(`/dashboard/list/${data.uuid}`)
+
+    } catch (error: any) {
+      console.error("Error creating new list: ", error)
+      return
     }
-    setLists([...lists, newList])
+
+
+
     setShowForm(false)
     setNewTitle("")
-    setNewDueDate("")
+    setNewDescription("")
+    router.push(`/dashboard/list/${data.uuid}`)
+
   }
 
   const formatDate = (dateString: string) => {
@@ -153,12 +179,12 @@ export function ListsOverview() {
                 />
               </div>
               <div>
-                <label className="block mb-1 font-medium">Due Date</label>
+                <label className="block mb-1 font-medium">Description</label>
                 <input
-                  type="date"
+                  type="text"
                   className="w-full border p-2 rounded"
-                  value={newDueDate}
-                  onChange={(e) => setNewDueDate(e.target.value)}
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
                 />
               </div>
               <div className="flex justify-end gap-2">
