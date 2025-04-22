@@ -1,4 +1,5 @@
 from datetime import timedelta
+import urllib.parse
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
@@ -13,6 +14,7 @@ from pydantic import BaseModel
 import bcrypt
 import datetime
 import uuid
+import urllib
 
 user_router = APIRouter()
 
@@ -74,13 +76,7 @@ def confirm_user(regTokenCiphertext: str, session: Session = Depends(get_session
     access_token = generate_jwt_token(user, timedelta(0, 60 * 15), "access")
     refresh_token = generate_jwt_token(user, timedelta(1), "refresh")
 
-    # return {
-    #     'access_token': access_token,
-    #     'refresh_token': refresh_token
-    # }
-    response = RedirectResponse(url="http://localhost:3000/?confirmed=true", status_code=302)
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    response = RedirectResponse(url=f"https://todoapp.reesenorr.is/postsignup?access_token={access_token}&refresh_token={refresh_token}", status_code=302)
     return response
 
 class LoginUserBody(BaseModel):
