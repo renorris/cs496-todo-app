@@ -8,10 +8,10 @@ from .database import create_tables
 
 app = FastAPI()
 
-# Allow frontend to talk to backend 
+# Allow all hosts to connect with credentials
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # frontend dev server
+    allow_origin_regex=".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
