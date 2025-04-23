@@ -22,7 +22,7 @@ interface ListSummary {
   title: string;
   due_date: string;
   created_at: string;
-  completed_tasks: number;
+  tasks_completed: number;
   total_tasks: number;
 }
 
@@ -48,7 +48,12 @@ const ListsOverview = () => {
         },
       });
       const data = await res.json();
-      setLists(data);
+      // Ensure completed_tasks and total_tasks are numbers
+      setLists(data.map((list: ListSummary) => ({
+        ...list,
+        completed_tasks: Number(list.tasks_completed),
+        total_tasks: Number(list.total_tasks),
+      })));
     } catch (error) {
       console.error('Error fetching lists:', error);
     }
@@ -141,44 +146,53 @@ const ListsOverview = () => {
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lists.length === 0 && <h2 className="text-2xl mb-4">No lists found</h2>}
-        {lists.length > 0 && lists.map((list) => (
-          <Link key={list.uuid} href={`/dashboard/list/${list.uuid}`}>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle>{list.title}</CardTitle>
-                  <Badge variant={new Date(list.due_date) < new Date() ? 'destructive' : 'outline'}>
-                    {new Date(list.due_date) < new Date() ? 'Overdue' : 'Active'}
-                  </Badge>
-                </div>
-                <CardDescription>
-                  <div className="flex items-center mt-2">
-                    <CalendarDays className="h-4 w-4 mr-1" />
-                    <span className="text-xs">Created: {formatDate(list.created_at)}</span>
+        {lists.length > 0 && lists.map((list) => {
+          // Calculate percentage, handling division by zero and non-numeric values
+          const completed = Number(list.tasks_completed);
+          const total = Number(list.total_tasks);
+          const percentage = !isNaN(completed) && !isNaN(total) && total > 0
+            ? Math.round((completed / total) * 100)
+            : 0;
+
+          return (
+            <Link key={list.uuid} href={`/dashboard/list/${list.uuid}`}>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <CardTitle>{list.title}</CardTitle>
+                    <Badge variant={new Date(list.due_date) < new Date() ? 'destructive' : 'outline'}>
+                      {new Date(list.due_date) < new Date() ? 'Overdue' : 'Active'}
+                    </Badge>
                   </div>
-                  <div className="flex items-center mt-1">
-                    <Clock className="h-4 w-4 mr-1" />
-                    <span className="text-xs">Due: {formatDate(list.due_date)}</span>
+                  <CardDescription>
+                    <div className="flex items-center mt-2">
+                      <CalendarDays className="h-4 w-4 mr-1" />
+                      <span className="text-xs">Created: {formatDate(list.created_at)}</span>
+                    </div>
+                    <div className="flex items-center mt-1">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span className="text-xs">Due: {formatDate(list.due_date)}</span>
+                    </div>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="w-24 h-24">
+                      <PieChart completed={list.tasks_completed} total={list.total_tasks} />
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">Progress</p>
+                      <p className="text-2xl font-bold">{percentage}%</p>
+                      <p className="text-xs text-muted-foreground">
+                        {list.tasks_completed} of {list.total_tasks} tasks
+                      </p>
+                    </div>
                   </div>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="w-24 h-24">
-                    <PieChart completed={list.completed_tasks} total={list.total_tasks} />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">Progress</p>
-                    <p className="text-2xl font-bold">{Math.round((list.completed_tasks / list.total_tasks) * 100)}%</p>
-                    <p className="text-xs text-muted-foreground">
-                      {list.completed_tasks} of {list.total_tasks} tasks
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
