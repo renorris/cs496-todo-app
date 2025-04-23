@@ -50,7 +50,7 @@ class TokenClaims:
 
 def parse_jwt_token(raw_token: str) -> TokenClaims:
     secret_key = os.getenv("SECRET_KEY")
-    token = jwt.decode(raw_token, secret_key)
+    token = jwt.decode(raw_token, secret_key, algorithms=["HS256"])
 
     claims = TokenClaims()
     claims.token_type = token['token_type']
