@@ -22,8 +22,8 @@ interface ListSummary {
   title: string;
   due_date: string;
   created_at: string;
-  completedTasks: number;
-  totalTasks: number;
+  completed_tasks: number;
+  total_tasks: number;
 }
 
 const ListsOverview = () => {
@@ -165,13 +165,13 @@ const ListsOverview = () => {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="w-24 h-24">
-                    <PieChart completed={list.completedTasks} total={list.totalTasks} />
+                    <PieChart completed={list.completed_tasks} total={list.total_tasks} />
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">Progress</p>
-                    <p className="text-2xl font-bold">{Math.round((list.completedTasks / list.totalTasks) * 100)}%</p>
+                    <p className="text-2xl font-bold">{Math.round((list.completed_tasks / list.total_tasks) * 100)}%</p>
                     <p className="text-xs text-muted-foreground">
-                      {list.completedTasks} of {list.totalTasks} tasks
+                      {list.completed_tasks} of {list.total_tasks} tasks
                     </p>
                   </div>
                 </div>
