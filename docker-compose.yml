@@ -25,6 +25,12 @@ services:
   frontend:
     build:
       context: ./frontend
+    hostname: frontend
+    restart: always
+    expose:
+      - "80:80/tcp"
+    networks:
+      - todoappnet
 
   caddy:
     image: docker.io/caddy:latest
