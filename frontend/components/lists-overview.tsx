@@ -10,7 +10,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Clock } from 'lucide-react';
+import { CalendarDays, Clock, Trash } from 'lucide-react';
 import { PieChart } from './pie-chart';
 import { useAuth } from '@/contexts/authcontext';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface ListSummary {
   uuid: string;
   title: string;
-  due_date: string;
+  earliest_due_date: string;
   created_at: string;
   tasks_completed: number;
   total_tasks: number;
@@ -48,7 +48,6 @@ const ListsOverview = () => {
         },
       });
       const data = await res.json();
-      // Ensure completed_tasks and total_tasks are numbers
       setLists(data.map((list: ListSummary) => ({
         ...list,
         completed_tasks: Number(list.tasks_completed),
@@ -77,7 +76,6 @@ const ListsOverview = () => {
         body: JSON.stringify({ title: newTitle, description: newDescription }),
       });
       if (res.ok) {
-        const data = await res.json();
         fetchLists();
         setShowAddForm(false);
         setNewTitle('');
@@ -95,6 +93,30 @@ const ListsOverview = () => {
       alert('An error occurred while creating the list');
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleDeleteList = async (listUuid: string) => {
+    if (!confirm('Are you sure you want to delete this list? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      const accessToken = await auth.getAccessToken();
+      const res = await fetch(`https://todoapp.reesenorr.is/api/list/${listUuid}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      if (res.ok) {
+        fetchLists();
+      } else {
+        const errorData = await res.json();
+        alert(`Error deleting list: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting list:', error);
+      alert('An error occurred while deleting the list');
     }
   };
 
@@ -147,7 +169,6 @@ const ListsOverview = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lists.length === 0 && <h2 className="text-2xl mb-4">No lists found</h2>}
         {lists.length > 0 && lists.map((list) => {
-          // Calculate percentage, handling division by zero and non-numeric values
           const completed = Number(list.tasks_completed);
           const total = Number(list.total_tasks);
           const percentage = !isNaN(completed) && !isNaN(total) && total > 0
@@ -158,11 +179,23 @@ const ListsOverview = () => {
             <Link key={list.uuid} href={`/dashboard/list/${list.uuid}`}>
               <Card className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-center">
                     <CardTitle>{list.title}</CardTitle>
-                    <Badge variant={new Date(list.due_date) < new Date() ? 'destructive' : 'outline'}>
-                      {new Date(list.due_date) < new Date() ? 'Overdue' : 'Active'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={new Date(list.earliest_due_date) < new Date() ? 'destructive' : 'outline'}>
+                        {new Date(list.earliest_due_date) < new Date() ? 'Overdue' : 'Active'}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteList(list.uuid);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <CardDescription>
                     <div className="flex items-center mt-2">
@@ -171,7 +204,7 @@ const ListsOverview = () => {
                     </div>
                     <div className="flex items-center mt-1">
                       <Clock className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Due: {formatDate(list.due_date)}</span>
+                      <span className="text-xs">Due: {formatDate(list.earliest_due_date)}</span>
                     </div>
                   </CardDescription>
                 </CardHeader>
