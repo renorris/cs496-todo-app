@@ -22,7 +22,7 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
     # Create a new list with its details
     l = list.List()
     l.uuid = uuid.uuid4()
-    l.created_at = datetime.datetime.now()
+    l.created_at = datetime.now()
     l.title = reqBody.title
     l.description = reqBody.description
 
@@ -209,4 +209,3 @@ def remove_list_access(list_uuid: str, other_user_uuid: str, session: Session = 
     session.commit()
 
     # No return needed, will return 204
-    
