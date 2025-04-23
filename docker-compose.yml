@@ -28,7 +28,7 @@ services:
     hostname: frontend
     restart: always
     expose:
-      - "80:80/tcp"
+      - "3000/tcp"
     networks:
       - todoappnet
 

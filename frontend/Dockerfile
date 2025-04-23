@@ -1,7 +1,6 @@
-FROM node:23 AS builder
+FROM node:23
 
-# Use /build as builder directory
-WORKDIR /build
+WORKDIR /app
 
 # Install packages
 COPY package*.json .
@@ -11,7 +10,4 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Nginx file server
-FROM nginx:alpine
-
-COPY --from=builder /build/dist /usr/share/nginx/html
+CMD ["npm", "run", "start"]

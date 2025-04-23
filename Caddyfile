@@ -3,6 +3,6 @@ https://todoapp.reesenorr.is {
         reverse_proxy fastapi:8000
     }
     handle {
-        reverse_proxy frontend:80
+        reverse_proxy frontend:3000
     }
 }
