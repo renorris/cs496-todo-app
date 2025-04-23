@@ -47,7 +47,7 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
 @list_router.get("/")
 def get_lists(session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
-    lists = session.query(list.List).join(list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid).filter(list_access.ListAccess.owner_uuid == user_uuid).order_by(list.List.due_date.desc()).all()
+    lists = session.query(list.List).join(list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid).filter(list_access.ListAccess.owner_uuid == user_uuid).order_by(list.List.created_at.desc()).all()
     return [{
         "uuid": str(l.uuid),
         "created_at": str(l.created_at),
