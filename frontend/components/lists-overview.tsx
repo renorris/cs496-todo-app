@@ -182,8 +182,8 @@ const ListsOverview = () => {
                   <div className="flex justify-between items-center">
                     <CardTitle>{list.title}</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge variant={new Date(list.earliest_due_date) < new Date() ? 'destructive' : 'outline'}>
-                        {new Date(list.earliest_due_date) < new Date() ? 'Overdue' : 'Active'}
+                      <Badge variant={new Date(list.earliest_due_date) < new Date() && list.total_tasks > 0 && list.total_tasks !== list.tasks_completed ? 'destructive' : 'outline'}>
+                        {list.total_tasks > list.tasks_completed ? new Date(list.earliest_due_date) < new Date() ? "Overdue" : "Active" : list.total_tasks === 0 ? "No tasks yet!" : "Completed"}
                       </Badge>
                       <Button
                         variant="outline"
