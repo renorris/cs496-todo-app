@@ -1,0 +1,43 @@
+version: '3.8'  # Specify a version for clarity
+services:
+  db:
+    image: docker.io/postgres:latest
+    hostname: db
+    restart: always
+    env_file: .env
+    expose:
+      - "5432" 
+    networks:
+      - todoappnet
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: dockerfile
+    hostname: fastapi
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    command: uv run fastapi dev main.py --host 0.0.0.0 --port 8000
+    # command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - todoappnet
+
+  caddy:
+    image: docker.io/caddy:latest
+    restart: always
+    env_file: .env
+    ports:
+      - "80:80"  
+      - "443:443" 
+    volumes:
+      - './Caddyfile:/etc/caddy/Caddyfile'
+    networks:
+      - todoappnet
+
+networks:
+  todoappnet:
+    name: todoapp_net

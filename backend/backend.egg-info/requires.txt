@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn[standard]
+sqlalchemy
+sqlmodel
+python-jose
+bcrypt
+pyjwt
+psycopg2-binary
+resend

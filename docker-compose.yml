@@ -1,0 +1,51 @@
+services:
+  db:
+    image: docker.io/postgres:latest
+    hostname: db
+    restart: always
+    env_file: .env
+    expose:
+      - "5432:5432/tcp"
+    networks:
+      - todoappnet
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+  
+  fastapi:
+    build:
+      context: ./backend
+    hostname: fastapi
+    restart: always
+    env_file: .env
+    expose:
+      - "8000:8000/tcp"
+    networks:
+      - todoappnet  
+
+  frontend:
+    build:
+      context: ./frontend
+    hostname: frontend
+    restart: always
+    expose:
+      - "3000/tcp"
+    networks:
+      - todoappnet
+
+  caddy:
+    image: docker.io/caddy:latest
+    restart: always
+    env_file: .env
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - './Caddyfile:/etc/caddy/Caddyfile'
+      - './caddy/config:/config'
+      - './caddy/data:/data'
+    networks:
+      - todoappnet
+
+networks:
+  todoappnet:    
+    name: todoapp_net

@@ -1,3 +1,13 @@
 .DS_Store
 .idea
 .vscode
+.venv
+.env
+.envrc
+__pycache__
+.ruff_cache
+.pytest_cache
+.DS_Store
+caddy
+postgres-data
+dist

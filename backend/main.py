@@ -1,0 +1,33 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .routes.user import user_router
+from .routes.list import list_router
+from .routes.task import task_router
+from .database import create_tables
+
+app = FastAPI()
+
+# Allow all hosts to connect with credentials
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=".*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register the startup event to create tables
+@app.on_event("startup")
+def on_startup():
+    create_tables()
+
+# Include routers from routes
+app.include_router(user_router, tags=["user"], prefix="/api/user")
+app.include_router(list_router, tags=["list"], prefix="/api/list")
+app.include_router(task_router, tags=["task"], prefix="/api/list/{list_uuid}/task")
+
+# Root endpoint
+@app.get("/")
+def read_root():
+    return {"hello": "world"}
