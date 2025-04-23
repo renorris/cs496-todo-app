@@ -1,4 +1,4 @@
-import { ListsOverview } from "@/components/lists-overview"
+import ListsOverview from "@/components/lists-overview"
 import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function DashboardPage() {

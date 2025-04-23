@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,51 +9,49 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Lock } from "lucide-react"
 
+import { useAuth } from '../contexts/authcontext'
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const auth = useAuth();
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, you would authenticate the user here
-    // For demo purposes, we'll just redirect to the dashboard
-    router.push("/dashboard")
+
+    try {
+      const response = await fetch("https://todoapp.reesenorr.is/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          'email': email,
+          'password': password,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Login failed")
+      }
+
+      const data = await response.json()
+
+      const access_token = data['access_token'];
+      const refresh_token = data['refresh_token'];
+
+      if (!access_token || !refresh_token) {
+          throw new Error("The api is broken uh oh.")
+      }
+
+      auth.login(access_token, refresh_token);
+      router.push("/dashboard")
+    } catch (error) {
+      console.error("Login error:", error)
+      alert("Invalid login credentials.")
+    }
   }
-
-  //UNCOMMENT BELOW ONCE WE GET THE FRONTEND AND BACKEND CONNECTED !! commenting out for now 
-  // so we can still login with mock values and view the rest of the pages like dashboard - ELLA
-  // const handleLogin = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-
-  //   try {
-  //     const response = await fetch("http://localhost:8000/user/login", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         email,
-  //         password,
-  //       }),
-  //     })
-
-  //     if (!response.ok) {
-  //       throw new Error("Login failed")
-  //     }
-
-  //     const data = await response.json()
-
-  //     if (data.access_token) {
-  //       localStorage.setItem("access_token", data.access_token)
-  //     }
-
-  //     router.push("/dashboard")
-  //   } catch (error) {
-  //     console.error("Login error:", error)
-  //     alert("Invalid login credentials.")
-  //   }
-  // }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

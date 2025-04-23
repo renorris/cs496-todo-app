@@ -4,12 +4,12 @@ import { AccessPanel } from "@/components/access-panel"
 
 interface TaskListPageProps {
   params: {
-    id: string
+    uuid: string
   }
 }
 
 export default function TaskListPage({ params }: TaskListPageProps) {
-  const listId = params.id
+  const listId = params.uuid
 
   return (
     <div className="min-h-screen bg-background">
