@@ -53,7 +53,7 @@ def get_lists(session: Session = Depends(get_session), current_user=Depends(get_
     lists_with_counts = session.query(
         list.List,
         func.count(Task.uuid).label('total_tasks'),
-        func.sum(case([(Task.done == True, 1)], else_=0)).label('tasks_completed')
+        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed')
     ).join(
         list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid
     ).outerjoin(
@@ -85,7 +85,7 @@ def get_list(list_uuid: str, session: Session = Depends(get_session), current_us
     result = session.query(
         list.List,
         func.count(Task.uuid).label('total_tasks'),
-        func.sum(case([(Task.done == True, 1)], else_=0)).label('tasks_completed')
+        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed')
     ).join(
         list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid
     ).outerjoin(
@@ -177,7 +177,7 @@ def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Dep
     la_other = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == other_user_uuid_obj).first()
     if la_other:
         return {"message": "User already has access"}, status.HTTP_200_OK
-    
+
     # Create new ListAccess
     new_la = list_access.ListAccess()
     new_la.uuid = uuid.uuid4()
@@ -209,3 +209,4 @@ def remove_list_access(list_uuid: str, other_user_uuid: str, session: Session = 
     session.commit()
 
     # No return needed, will return 204
+    
