@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { CalendarDays, Clock, Plus, Trash2 } from "lucide-react"
+import { CalendarDays, Clock, Plus, Trash2, Pencil } from "lucide-react"
 import { useAuth } from "../contexts/authcontext"
 
 // Define interfaces for data structures
@@ -58,9 +58,12 @@ export function TaskList({ listId }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState<string>("")
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const initiallyLoaded = useRef<boolean>(false);
+  const initiallyLoaded = useRef<boolean>(false)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [newDueDate, setNewDueDate] = useState<string>("")
+  const [originalDueDateTime, setOriginalDueDateTime] = useState<string>("")
 
-  const auth = useAuth();
+  const auth = useAuth()
 
   // Fetch list and tasks from API
   const fetchListData = async () => {
@@ -110,7 +113,7 @@ export function TaskList({ listId }: TaskListProps) {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
-      initiallyLoaded.current = true;
+      initiallyLoaded.current = true
       setLoading(false)
     }
   }
@@ -124,7 +127,7 @@ export function TaskList({ listId }: TaskListProps) {
   const addNewTask = async () => {
     if (newTaskTitle.trim() === "") return
     try {
-      const accessToken: string = await (auth as AuthContext).getAccessToken()
+      const accessToken = await auth.getAccessToken()
       const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/`, {
         method: "POST",
@@ -143,7 +146,7 @@ export function TaskList({ listId }: TaskListProps) {
         throw new Error("Failed to create task")
       }
       setNewTaskTitle("")
-      await fetchListData() // Refetch data after adding task
+      await fetchListData()
     } catch (error: unknown) {
       console.error("Error creating task:", error)
     }
@@ -152,7 +155,7 @@ export function TaskList({ listId }: TaskListProps) {
   // Toggle task completion via API
   const toggleTaskCompletion = async (taskId: string) => {
     try {
-      const accessToken: string = await (auth as AuthContext).getAccessToken()
+      const accessToken = await auth.getAccessToken()
       const task = listData?.tasks.find((t) => t.uuid === taskId)
       if (!task) return
       const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
@@ -168,7 +171,7 @@ export function TaskList({ listId }: TaskListProps) {
       if (!response.ok) {
         throw new Error("Failed to update task")
       }
-      await fetchListData() // Refetch data after updating task
+      await fetchListData()
     } catch (error: unknown) {
       console.error("Error updating task:", error)
     }
@@ -177,7 +180,7 @@ export function TaskList({ listId }: TaskListProps) {
   // Remove task via API
   const removeTask = async (taskId: string) => {
     try {
-      const accessToken: string = await (auth as AuthContext).getAccessToken()
+      const accessToken = await auth.getAccessToken()
       const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
         method: "DELETE",
         headers: {
@@ -187,10 +190,61 @@ export function TaskList({ listId }: TaskListProps) {
       if (!response.ok) {
         throw new Error("Failed to delete task")
       }
-      await fetchListData() // Refetch data after deleting task
+      await fetchListData()
     } catch (error: unknown) {
       console.error("Error deleting task:", error)
     }
+  }
+
+  // Start editing task due date
+  const startEditing = (taskId: string, currentDueDate: string) => {
+    const date = new Date(currentDueDate)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    setNewDueDate(`${year}-${month}-${day}`)
+    setOriginalDueDateTime(currentDueDate)
+    setEditingTaskId(taskId)
+  }
+
+  // Handle date change
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewDueDate(e.target.value)
+  }
+
+  // Save new due date
+  const saveDueDate = async (taskId: string) => {
+    if (!newDueDate || !originalDueDateTime) return
+    try {
+      const accessToken = await auth.getAccessToken()
+      const originalDate = new Date(originalDueDateTime)
+      const hours = String(originalDate.getUTCHours()).padStart(2, '0')
+      const minutes = String(originalDate.getUTCMinutes()).padStart(2, '0')
+      const seconds = String(originalDate.getUTCSeconds()).padStart(2, '0')
+      const newIsoDate = `${newDueDate}T${hours}:${minutes}:${seconds}Z`
+      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          due_date: newIsoDate,
+        }),
+      })
+      if (!response.ok) {
+        throw new Error("Failed to update task due date")
+      }
+      setEditingTaskId(null)
+      await fetchListData()
+    } catch (error) {
+      console.error("Error updating task due date:", error)
+    }
+  }
+
+  // Cancel editing
+  const cancelEdit = () => {
+    setEditingTaskId(null)
   }
 
   // Format date for display
@@ -251,8 +305,8 @@ export function TaskList({ listId }: TaskListProps) {
               <Input
                 placeholder="Add a new task..."
                 value={newTaskTitle}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTaskTitle(e.target.value)}
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     addNewTask()
                   }
@@ -266,7 +320,7 @@ export function TaskList({ listId }: TaskListProps) {
 
             {/* Task list */}
             <div className="space-y-4">
-              {listData.tasks.map((task: Task) => (
+              {listData.tasks.map((task) => (
                 <Card key={task.uuid} className="overflow-hidden">
                   <div className="p-4 flex items-start justify-between">
                     <div className="flex items-start space-x-3">
@@ -289,12 +343,31 @@ export function TaskList({ listId }: TaskListProps) {
                             <CalendarDays className="h-3 w-3 mr-1" />
                             <span>Created: {formatDate(task.created_at)}</span>
                           </div>
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span className={isOverdue(task.due_date) && !task.completed ? "text-destructive" : ""}>
-                              Due: {formatDate(task.due_date)}
-                            </span>
-                          </div>
+                          {editingTaskId === task.uuid ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="date"
+                                value={newDueDate}
+                                onChange={handleDateChange}
+                                className="text-xs border rounded p-1"
+                              />
+                              <Button variant="outline" size="sm" onClick={() => saveDueDate(task.uuid)}>
+                                Save
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={cancelEdit}>
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span className={isOverdue(task.due_date) && !task.completed ? "text-destructive" : ""}>
+                                Due: {formatDate(task.due_date)}
+                              </span>
+                              <Button variant="ghost" size="icon" onClick={() => startEditing(task.uuid, task.due_date)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
