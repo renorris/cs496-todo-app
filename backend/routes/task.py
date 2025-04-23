@@ -71,7 +71,7 @@ def get_tasks(list_uuid: uuid.UUID, session: Session = Depends(get_session), cur
         raise HTTPException(status_code=404, detail="List not found")
     
     # Get all tasks for this list
-    tasks = session.query(Task).filter(Task.list_uuid == list_uuid).all()
+    tasks = session.query(Task).filter(Task.list_uuid == list_uuid).order_by(Task.due_date.desc()).all()
     
     # Return list of tasks
     return [{
