@@ -142,12 +142,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             const decoded: AccessTokenPayload = jwtDecode(stateAccessToken);
             const currentTime = Date.now() / 1000;
-            
-            await refreshAccessToken();
 
-            // TODO: put this back
             if (decoded.exp < currentTime + 300) {
-                // noop
+                await refreshAccessToken();
             }
             return stateAccessToken;
         } catch (error) {
