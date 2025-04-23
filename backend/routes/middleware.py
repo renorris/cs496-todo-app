@@ -20,3 +20,4 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         return payload
     except jwt.PyJWTError:
         raise credentials_exception
+    
