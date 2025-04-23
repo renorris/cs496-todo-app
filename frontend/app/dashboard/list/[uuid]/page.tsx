@@ -27,3 +27,10 @@ export default function TaskListPage({ params }: TaskListPageProps) {
     </div>
   )
 }
+
+export async function generateStaticParams() {
+  return [
+    { uuid: "0" },
+  ];
+}
+
