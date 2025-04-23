@@ -7,8 +7,7 @@ from sqlmodel import Session
 from ..models.user import User
 from ..database import get_session
 
-from ..utils.token import generate_jwt_token
-from ..utils.token import generate_registration_token, decrypt_registration_token
+from ..utils.token import generate_registration_token, decrypt_registration_token, parse_jwt_token, generate_jwt_token
 from ..utils.email import send_confirmation_email
 from pydantic import BaseModel
 import bcrypt
@@ -102,4 +101,26 @@ def login_user(req_body: LoginUserBody, session: Session = Depends(get_session))
     return {
         'access_token': access_token,
         'refresh_token': refresh_token
+    }
+
+class RefreshAccessTokenBody(BaseModel):
+    refresh_token: str
+
+@user_router.post("/refresh")
+def refresh(req_body: RefreshAccessTokenBody, session: Session = Depends(get_session)):
+    refresh_token_str = req_body.refresh_token
+    refresh_token = parse_jwt_token(refresh_token_str)
+    
+    if refresh_token.token_type != "refresh":
+        raise HTTPException(status_code=400, detail="bad token")
+    
+    rows = session.query(User).filter(User.email == refresh_token.email)
+    user = rows.first()
+    if not user:
+        raise HTTPException(status_code=401, detail="unauthorized")
+
+    access_token_str = generate_jwt_token(user, timedelta(days=0, minutes=15), "access")
+
+    return {
+        'access_token': access_token_str
     }
