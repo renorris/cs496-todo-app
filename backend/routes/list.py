@@ -40,7 +40,7 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
     # Return the details of the newly created list
     return {
         "uuid": str(l.uuid),
-        "created_at": str(l.created_at),
+        "created_at": l.created_at.isoformat(),
         "title": l.title,
         "description": l.description,
     }
@@ -49,11 +49,12 @@ def create_list(reqBody: CreateListBody, session: Session = Depends(get_session)
 def get_lists(session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     
-    # Fetch all lists with task counts in a single query
+    # Fetch all lists with task counts and earliest due date
     lists_with_counts = session.query(
         list.List,
         func.count(Task.uuid).label('total_tasks'),
-        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed')
+        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed'),
+        func.min(Task.due_date).label('earliest_due_date')
     ).join(
         list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid
     ).outerjoin(
@@ -66,14 +67,15 @@ def get_lists(session: Session = Depends(get_session), current_user=Depends(get_
         list.List.created_at.desc()
     ).all()
     
-    # Return lists with their details and task counts
+    # Return lists with details, task counts, and earliest due date
     return [{
         "uuid": str(row.List.uuid),
-        "created_at": str(row.List.created_at),
+        "created_at": row.List.created_at.isoformat(),
         "title": row.List.title,
         "description": row.List.description,
         "total_tasks": row.total_tasks,
-        "tasks_completed": row.tasks_completed
+        "tasks_completed": row.tasks_completed,
+        "earliest_due_date": row.earliest_due_date.isoformat() if row.earliest_due_date else None
     } for row in lists_with_counts]
 
 @list_router.get("/{list_uuid}")
@@ -81,11 +83,12 @@ def get_list(list_uuid: str, session: Session = Depends(get_session), current_us
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
     
-    # Fetch the single list with task counts in a single query
+    # Fetch single list with task counts and earliest due date
     result = session.query(
         list.List,
         func.count(Task.uuid).label('total_tasks'),
-        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed')
+        func.sum(case((Task.done == True, 1), else_=0)).label('tasks_completed'),
+        func.min(Task.due_date).label('earliest_due_date')
     ).join(
         list_access.ListAccess, list.List.uuid == list_access.ListAccess.list_uuid
     ).outerjoin(
@@ -97,18 +100,19 @@ def get_list(list_uuid: str, session: Session = Depends(get_session), current_us
         list.List.uuid
     ).first()
     
-    # If no result is found (list doesn't exist or user has no access), raise 404
+    # If list not found, raise 404
     if result is None:
         raise HTTPException(status_code=404, detail="List not found")
     
-    # Return the list with its details and task counts
+    # Return list with details, task counts, and earliest due date
     return {
         "uuid": str(result.List.uuid),
-        "created_at": str(result.List.created_at),
+        "created_at": result.List.created_at.isoformat(),
         "title": result.List.title,
         "description": result.List.description,
         "total_tasks": result.total_tasks,
-        "tasks_completed": result.tasks_completed
+        "tasks_completed": result.tasks_completed,
+        "earliest_due_date": result.earliest_due_date.isoformat() if result.earliest_due_date else None
     }
 
 @list_router.put("/{list_uuid}")
@@ -127,7 +131,7 @@ def update_list(list_uuid: str, reqBody: CreateListBody, session: Session = Depe
     session.commit()
     return {
         "uuid": str(l.uuid),
-        "created_at": str(l.created_at),
+        "created_at": l.created_at.isoformat(),
         "title": l.title,
         "description": l.description,
     }
@@ -182,7 +186,7 @@ def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Dep
     new_la = list_access.ListAccess()
     new_la.uuid = uuid.uuid4()
     new_la.list_uuid = list_uuid_obj
-    new_la.owner_uuid = other_user_uuid_obj
+    new_la.owner_uuid = other_user_uuid
     session.add(new_la)
     session.commit()
 
@@ -209,3 +213,4 @@ def remove_list_access(list_uuid: str, other_user_uuid: str, session: Session = 
     session.commit()
 
     # No return needed, will return 204
+    
