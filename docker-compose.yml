@@ -22,6 +22,10 @@ services:
     networks:
       - todoappnet  
 
+  frontend:
+    build:
+      context: ./frontend
+
   caddy:
     image: docker.io/caddy:latest
     restart: always
