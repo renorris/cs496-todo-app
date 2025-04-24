@@ -53,6 +53,8 @@ interface AuthContext {
   getAccessToken: () => Promise<string>
 }
 
+
+
 export function TaskList({ listId }: TaskListProps) {
   const [listData, setListData] = useState<ListData | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState<string>("")
@@ -72,7 +74,7 @@ export function TaskList({ listId }: TaskListProps) {
     try {
       const accessToken = await auth.getAccessToken()
       // Fetch list details
-      const listResponse = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}`, {
+      const listResponse = await fetch(`http://localhost:8000/api/list/${listId}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
@@ -84,7 +86,7 @@ export function TaskList({ listId }: TaskListProps) {
       const list: ListResponse = await listResponse.json()
 
       // Fetch tasks
-      const tasksResponse = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/`, {
+      const tasksResponse = await fetch(`http://localhost:8000/api/list/${listId}/task/`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
@@ -129,7 +131,7 @@ export function TaskList({ listId }: TaskListProps) {
     try {
       const accessToken = await auth.getAccessToken()
       const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/`, {
+      const response = await fetch(`http://localhost:8000/api/list/${listId}/task/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -158,7 +160,7 @@ export function TaskList({ listId }: TaskListProps) {
       const accessToken = await auth.getAccessToken()
       const task = listData?.tasks.find((t) => t.uuid === taskId)
       if (!task) return
-      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
+      const response = await fetch(`http://localhost:8000/api/list/${listId}/task/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -181,7 +183,7 @@ export function TaskList({ listId }: TaskListProps) {
   const removeTask = async (taskId: string) => {
     try {
       const accessToken = await auth.getAccessToken()
-      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
+      const response = await fetch(`http://localhost:8000/api/list/${listId}/task/${taskId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${accessToken}`,
@@ -222,7 +224,7 @@ export function TaskList({ listId }: TaskListProps) {
       const minutes = String(originalDate.getUTCMinutes()).padStart(2, '0')
       const seconds = String(originalDate.getUTCSeconds()).padStart(2, '0')
       const newIsoDate = `${newDueDate}T${hours}:${minutes}:${seconds}Z`
-      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/${taskId}`, {
+      const response = await fetch(`http://localhost:8000/api/list/${listId}/task/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
