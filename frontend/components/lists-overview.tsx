@@ -42,7 +42,7 @@ const ListsOverview = () => {
   const fetchLists = async () => {
     try {
       const accessToken = await auth.getAccessToken();
-      const res = await fetch('http://localhost:8000/api/list/', {
+      const res = await fetch('https://todoapp.reesenorr.is/api/list/', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
@@ -68,7 +68,7 @@ const ListsOverview = () => {
     setIsCreating(true);
     try {
       const accessToken = await auth.getAccessToken();
-      const res = await fetch('http://localhost:8000/api/list/create', {
+      const res = await fetch('https://todoapp.reesenorr.is/api/list/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const ListsOverview = () => {
     }
     try {
       const accessToken = await auth.getAccessToken();
-      const res = await fetch(`http://localhost:8000/api/list/${listUuid}`, {
+      const res = await fetch(`https://todoapp.reesenorr.is/api/list/${listUuid}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

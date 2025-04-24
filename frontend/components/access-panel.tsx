@@ -37,7 +37,7 @@ export function AccessPanel({ listId }: AccessPanelProps) {
     setError(null)
     try {
       const accessToken = await auth.getAccessToken()
-      const response = await fetch(`http://localhost:8000/api/list/${listId}/access`, {
+      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/access`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
@@ -61,7 +61,7 @@ export function AccessPanel({ listId }: AccessPanelProps) {
     try {
       const encodedEmail = encodeURIComponent(newUserEmail.trim())
       const accessToken = await auth.getAccessToken()
-      const response = await fetch(`http://localhost:8000/api/list/${listId}/access/${encodedEmail}`, {
+      const response = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/access/${encodedEmail}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
