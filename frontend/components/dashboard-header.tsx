@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useAuth } from '@/contexts/authcontext';
 import dynamic from 'next/dynamic';
+
+import { useAuth } from "@/contexts/authcontext"
+import { ThemeSwitcherButton } from '@/components/ThemeSwitcherButton';
 
 // DEFINE User-Menu Dropdown Component so that we avoid rendering before user credentials are stored
 const UserMenuComponent = () => {
@@ -111,17 +113,7 @@ export function DashboardHeader() {
             <h2 className="text-xl font-bold">TaskDocker</h2>
         </div>
         <div className="flex items-center gap-4">
-          {/* if time persists, change button to add functionality
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden md:flex"
-            onClick={() => router.push("/dashboard/new-list")}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New List
-          </Button>
-          */}
+          <ThemeSwitcherButton />
           <UserMenu />
         </div>
       </div>
