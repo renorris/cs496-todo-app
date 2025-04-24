@@ -13,6 +13,7 @@ import {
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic';
+import { Bell } from "lucide-react"
 
 import { useAuth } from "@/contexts/authcontext"
 import { ThemeSwitcherButton } from '@/components/ThemeSwitcherButton';
@@ -35,7 +36,23 @@ const UserMenuComponent = () => {
   const userInitials = getInitials(userName);
 
   return (
-    <DropdownMenu>
+    <>
+       <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Notifications">
+                <Bell className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <span>Nothing to see here!</span>
+                  <img src="/funny_dog.jpg"></img>
+                </div>
+              </DropdownMenuLabel>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
@@ -73,7 +90,8 @@ const UserMenuComponent = () => {
             <span>Log out</span>
           </DropdownMenuItem>
        </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+    </>
   );
 
 };
