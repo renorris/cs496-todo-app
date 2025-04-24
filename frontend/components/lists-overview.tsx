@@ -127,12 +127,12 @@ const ListsOverview = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Your Lists</h1>
-        <Button 
-          onClick={() => setShowAddForm(true)}
-          className={lists.length === 0 && !showAddForm ? "animate-bounce" : ""}
-        >
-          Add List
-        </Button>
+        {lists.length > 0 ? 
+          <Button onClick={() => setShowAddForm(true)} className={lists.length === 0 && !showAddForm ? "animate-bounce" : ""}>
+            Add List
+          </Button> 
+          : ""
+        }
       </div>
       {showAddForm && (
         <Card className="mb-4">
@@ -173,7 +173,9 @@ const ListsOverview = () => {
         </Card>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {lists.length === 0 && <h2 className="text-2xl mb-4">No lists found</h2>}
+        {lists.length === 0 && !showAddForm ? <><h2 className="text-2xl mb-4">No lists found</h2>
+         </> : ""
+        }
         {lists.length > 0 && lists.map((list) => {
           const completed = Number(list.tasks_completed);
           const total = Number(list.total_tasks);
@@ -234,6 +236,17 @@ const ListsOverview = () => {
           );
         })}
       </div>
+      { lists.length === 0 && !showAddForm ? 
+      <div className="mt-3">
+        <Button 
+          onClick={() => setShowAddForm(true)} 
+          className={lists.length === 0 && !showAddForm ? "animate-pulse" : ""}
+          size="lg"
+        >
+          Add List
+        </Button>
+      </div>
+      : "" }
     </div>
   );
 };
