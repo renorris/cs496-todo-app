@@ -83,7 +83,7 @@ export default function SignupPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <Label>Password</Label>
               <Input
                 type="password"
