@@ -161,24 +161,53 @@ def delete_list(list_uuid: str, session: Session = Depends(get_session), current
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@list_router.put("/{list_uuid}/access/{other_user_uuid}")
-def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
+@list_router.get("/{list_uuid}/access")
+def get_list_access(list_uuid: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
     user_uuid = uuid.UUID(current_user['uuid'])
     list_uuid_obj = uuid.UUID(list_uuid)
-    other_user_uuid_obj = uuid.UUID(other_user_uuid)
 
-    # Check if current_user has access to list_uuid
     la_current = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == user_uuid).first()
     if not la_current:
         raise HTTPException(status_code=404, detail="List not found")
 
-    # Check if other_user exists
-    other_user = session.query(User).filter(User.uuid == other_user_uuid_obj).first()
+    access_list = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj).all()
+
+    users_access = []
+    for access in access_list:
+        user = session.query(User).filter(User.uuid == access.owner_uuid).first()
+        if user:
+            users_access.append({
+                "uuid": str(user.uuid),
+                "name": user.first_name + " " + user.last_name,
+                "email": user.email,
+            })
+
+    return users_access
+
+@list_router.put("/{list_uuid}/access/{email}")
+def add_list_access(list_uuid: str, email: str, session: Session = Depends(get_session), current_user=Depends(get_current_user)):
+    user_uuid = uuid.UUID(current_user['uuid'])
+    list_uuid_obj = uuid.UUID(list_uuid)
+
+    # Find user by email
+    other_user = session.query(User).filter(User.email.ilike(email)).first()
     if not other_user:
         raise HTTPException(status_code=404, detail="User not found")
+    other_user_uuid_obj = other_user.uuid
+
+    # Check if current_user has access to list_uuid
+    la_current = session.query(list_access.ListAccess).filter(
+        list_access.ListAccess.list_uuid == list_uuid_obj,
+        list_access.ListAccess.owner_uuid == user_uuid
+    ).first()
+    if not la_current:
+        raise HTTPException(status_code=404, detail="List not found")
 
     # Check if other_user already has access
-    la_other = session.query(list_access.ListAccess).filter(list_access.ListAccess.list_uuid == list_uuid_obj, list_access.ListAccess.owner_uuid == other_user_uuid_obj).first()
+    la_other = session.query(list_access.ListAccess).filter(
+        list_access.ListAccess.list_uuid == list_uuid_obj,
+        list_access.ListAccess.owner_uuid == other_user_uuid_obj
+    ).first()
     if la_other:
         return {"message": "User already has access"}, status.HTTP_200_OK
 
@@ -186,7 +215,7 @@ def add_list_access(list_uuid: str, other_user_uuid: str, session: Session = Dep
     new_la = list_access.ListAccess()
     new_la.uuid = uuid.uuid4()
     new_la.list_uuid = list_uuid_obj
-    new_la.owner_uuid = other_user_uuid
+    new_la.owner_uuid = other_user_uuid_obj
     session.add(new_la)
     session.commit()
 
