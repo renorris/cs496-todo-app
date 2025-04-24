@@ -14,38 +14,29 @@ services:
   fastapi:
     build:
       context: ./backend
-    hostname: fastapi
+    hostname: todo-fastapi
     restart: always
     env_file: .env
     expose:
       - "8000:8000/tcp"
     networks:
-      - todoappnet  
+      - todoappnet 
+      - caddynet 
 
   frontend:
     build:
       context: ./frontend
-    hostname: frontend
+    hostname: todo-frontend
     restart: always
     expose:
       - "3000/tcp"
     networks:
       - todoappnet
-
-  caddy:
-    image: docker.io/caddy:latest
-    restart: always
-    env_file: .env
-    ports:
-      - "80:80/tcp"
-      - "443:443/tcp"
-    volumes:
-      - './Caddyfile:/etc/caddy/Caddyfile'
-      - './caddy/config:/config'
-      - './caddy/data:/data'
-    networks:
-      - todoappnet
+      - caddynet
 
 networks:
-  todoappnet:    
+  todoappnet:
     name: todoapp_net
+  caddynet:    
+    name: caddy_net
+    external: true
