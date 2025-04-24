@@ -127,7 +127,12 @@ const ListsOverview = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Your Lists</h1>
-        <Button onClick={() => setShowAddForm(true)}>Add List</Button>
+        <Button 
+          onClick={() => setShowAddForm(true)}
+          className={lists.length === 0 && !showAddForm ? "animate-bounce" : ""}
+        >
+          Add List
+        </Button>
       </div>
       {showAddForm && (
         <Card className="mb-4">
