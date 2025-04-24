@@ -294,7 +294,7 @@ export function TaskList({ listId }: TaskListProps) {
   const completedTasks = listData.tasks.filter(task => task.completed)
   
   // Determine status
-  const allTasksCompleted = listData.tasks.length > 0 && listData.tasks.every(task => task.completed)
+  const allTasksCompleted = (listData.tasks.length > 0 && listData.tasks.every(task => task.completed)) || listData.tasks.length === 0
   const status = allTasksCompleted ? "Completed" : isOverdue(listData.earliest_due_date) ? "Overdue" : "Active"
   const variant = allTasksCompleted ? "default" : isOverdue(listData.earliest_due_date) ? "destructive" : "outline"
   
@@ -345,14 +345,14 @@ export function TaskList({ listId }: TaskListProps) {
     <CalendarDays className="h-4 w-4 mr-1" />
     <span className="text-sm">Created: {formatDate(listData.created_at)}</span>
     </div>
-    <div className="flex items-center">
-    <Clock className="h-4 w-4 mr-1" />
-    <span className="text-sm">Due: {formatDate(listData.earliest_due_date)}</span>
+    { listData.tasks.length > 0 ? <div className="flex items-center">
+      <Clock className="h-4 w-4 mr-1" /> 
+      <span className="text-sm">Due: {formatDate(listData.earliest_due_date)}</span>
+    </div> : ""}
     </div>
     </div>
-    </div>
-    <Badge variant={variant} className="text-sm">
-    {status}
+    <Badge variant={listData.tasks.length === 0 ? "outline" : variant} className="text-sm">
+    {listData.tasks.length === 0 ? "Empty" : status}
     </Badge>
     </div>
     

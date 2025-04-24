@@ -208,10 +208,11 @@ const ListsOverview = () => {
                       <CalendarDays className="h-4 w-4 mr-1" />
                       <span className="text-xs">Created: {formatDate(list.created_at)}</span>
                     </div>
-                    <div className="flex items-center mt-1">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Due: {formatDate(list.earliest_due_date)}</span>
-                    </div>
+                      {list.earliest_due_date ? 
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span className="text-xs">Due: {formatDate(list.earliest_due_date)}</span>
+                      </div> : ""}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
