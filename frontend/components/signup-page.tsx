@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [message, setMessage] = useState("")
+  const [messageMood, setMessageMood] = useState("good")
   const router = useRouter()
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -42,10 +43,11 @@ export default function SignupPage() {
         const data = await response.json()
         throw new Error(data.detail || "Signup failed")
       }
-
+      setMessageMood("good");
       setMessage("Confirmation email sent! Please check your inbox.")
     } catch (error: any) {
       console.error("Signup error:", error)
+      setMessageMood("bad");
       setMessage(error.message || "Something went wrong.")
     }
   }
@@ -57,7 +59,7 @@ export default function SignupPage() {
           <CardTitle className="text-xl">Create an Account</CardTitle>
         </CardHeader>
         <form onSubmit={handleSignup}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 mb-4">
             <div className="space-y-2">
               <Label>First Name</Label>
               <Input
@@ -92,9 +94,9 @@ export default function SignupPage() {
                 required
               />
             </div>
-            {message && (
+            {message && messageMood === "bad" ?
               <p className="text-sm text-center text-red-500">{message}</p>
-            )}
+            : <p className="text-sm text-center text-green-500">{message}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <Button type="submit" className="w-full">
