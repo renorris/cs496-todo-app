@@ -75,7 +75,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
                   <a href="#" className="text-sm text-primary hover:underline">
@@ -113,10 +113,6 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold">Containerized To-Do App</h1>
           <p className="text-lg">Organize your tasks efficiently with our Docker-powered task management system.</p>
           <div className="flex flex-col space-y-3 mt-8">
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2" />
-              <span>Secure and containerized</span>
-            </div>
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               <span>Collaborative task management</span>
