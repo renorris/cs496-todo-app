@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { CalendarDays, Clock, Plus, Trash2, Pencil } from "lucide-react"
 import { useAuth } from "../contexts/authcontext"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Define interfaces for data structures
 interface Task {
@@ -27,7 +28,7 @@ interface ListData {
   tasks: Task[]
 }
 
-// API response types (based on assumed structure)
+// API response types
 interface ListResponse {
   uuid: string
   title: string
@@ -48,12 +49,9 @@ interface TaskListProps {
   listId: string
 }
 
-// Assume auth context type
 interface AuthContext {
   getAccessToken: () => Promise<string>
 }
-
-
 
 export function TaskList({ listId }: TaskListProps) {
   const [listData, setListData] = useState<ListData | null>(null)
@@ -73,31 +71,24 @@ export function TaskList({ listId }: TaskListProps) {
     setError(null)
     try {
       const accessToken = await auth.getAccessToken()
-      // Fetch list details
       const listResponse = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
         },
       })
-      if (!listResponse.ok) {
-        throw new Error("Failed to fetch list")
-      }
+      if (!listResponse.ok) throw new Error("Failed to fetch list")
       const list: ListResponse = await listResponse.json()
 
-      // Fetch tasks
       const tasksResponse = await fetch(`https://todoapp.reesenorr.is/api/list/${listId}/task/`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
         },
       })
-      if (!tasksResponse.ok) {
-        throw new Error("Failed to fetch tasks")
-      }
+      if (!tasksResponse.ok) throw new Error("Failed to fetch tasks")
       const tasks: TaskResponse[] = await tasksResponse.json()
 
-      // Map API response to component's expected format
       setListData({
         uuid: list.uuid,
         title: list.title,
@@ -144,9 +135,7 @@ export function TaskList({ listId }: TaskListProps) {
           done: false,
         }),
       })
-      if (!response.ok) {
-        throw new Error("Failed to create task")
-      }
+      if (!response.ok) throw new Error("Failed to create task")
       setNewTaskTitle("")
       await fetchListData()
     } catch (error: unknown) {
@@ -170,9 +159,7 @@ export function TaskList({ listId }: TaskListProps) {
           done: !task.completed,
         }),
       })
-      if (!response.ok) {
-        throw new Error("Failed to update task")
-      }
+      if (!response.ok) throw new Error("Failed to update task")
       await fetchListData()
     } catch (error: unknown) {
       console.error("Error updating task:", error)
@@ -189,9 +176,7 @@ export function TaskList({ listId }: TaskListProps) {
           "Authorization": `Bearer ${accessToken}`,
         },
       })
-      if (!response.ok) {
-        throw new Error("Failed to delete task")
-      }
+      if (!response.ok) throw new Error("Failed to delete task")
       await fetchListData()
     } catch (error: unknown) {
       console.error("Error deleting task:", error)
@@ -234,9 +219,7 @@ export function TaskList({ listId }: TaskListProps) {
           due_date: newIsoDate,
         }),
       })
-      if (!response.ok) {
-        throw new Error("Failed to update task due date")
-      }
+      if (!response.ok) throw new Error("Failed to update task due date")
       setEditingTaskId(null)
       await fetchListData()
     } catch (error) {
@@ -274,6 +257,10 @@ export function TaskList({ listId }: TaskListProps) {
     return <div>List not found</div>
   }
 
+  // Separate tasks into incomplete and completed
+  const incompleteTasks = listData.tasks.filter(task => !task.completed)
+  const completedTasks = listData.tasks.filter(task => task.completed)
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -309,9 +296,7 @@ export function TaskList({ listId }: TaskListProps) {
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    addNewTask()
-                  }
+                  if (e.key === "Enter") addNewTask()
                 }}
               />
               <Button onClick={addNewTask}>
@@ -320,18 +305,33 @@ export function TaskList({ listId }: TaskListProps) {
               </Button>
             </div>
 
-            {/* Task list */}
+            {/* Incomplete Tasks */}
             <div className="space-y-4">
-              {listData.tasks.map((task) => (
-                <Card key={task.uuid} className="overflow-hidden">
+              <h3 className="text-lg font-semibold">To Do</h3>
+              {incompleteTasks.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No tasks to do. Add one above!</p>
+                </div>
+              )}
+              {incompleteTasks.map((task) => (
+                <Card key={task.uuid} className="overflow-hidden transition-all duration-300 hover:shadow-md">
                   <div className="p-4 flex items-start justify-between">
                     <div className="flex items-start space-x-3">
-                      <Checkbox
-                        id={task.uuid}
-                        checked={task.completed}
-                        onCheckedChange={() => toggleTaskCompletion(task.uuid)}
-                        className="mt-1"
-                      />
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Checkbox
+                              id={task.uuid}
+                              checked={task.completed}
+                              onCheckedChange={() => toggleTaskCompletion(task.uuid)}
+                              className="mt-1 w-6 h-6 border-2 border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Mark as complete</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <div className="space-y-1">
                         <label
                           htmlFor={task.uuid}
@@ -384,13 +384,85 @@ export function TaskList({ listId }: TaskListProps) {
                   </div>
                 </Card>
               ))}
-
-              {listData.tasks.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No tasks yet. Add your first task above!</p>
-                </div>
-              )}
             </div>
+
+            {/* Completed Tasks */}
+            {completedTasks.length > 0 && (
+              <div className="space-y-4 mt-8">
+                <h3 className="text-lg font-semibold">Done</h3>
+                {completedTasks.map((task) => (
+                  <Card key={task.uuid} className="overflow-hidden opacity-75 transition-all duration-300 hover:shadow-md">
+                    <div className="p-4 flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Checkbox
+                                id={task.uuid}
+                                checked={task.completed}
+                                onCheckedChange={() => toggleTaskCompletion(task.uuid)}
+                                className="mt-1 w-6 h-6 border-0 data-[state=checked]:bg-red-200 data-[state=checked]:text-white"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Mark as incomplete</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <div className="space-y-1">
+                          <label
+                            htmlFor={task.uuid}
+                            className={`font-medium ${task.completed ? "line-through text-muted-foreground" : ""}`}
+                          >
+                            {task.title}
+                          </label>
+                          <p className="text-sm text-muted-foreground">{task.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                            <div className="flex items-center">
+                              <CalendarDays className="h-3 w-3 mr-1" />
+                              <span>Created: {formatDate(task.created_at)}</span>
+                            </div>
+                            {editingTaskId === task.uuid ? (
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="date"
+                                  value={newDueDate}
+                                  onChange={handleDateChange}
+                                  className="text-xs border rounded p-1"
+                                />
+                                <Button variant="outline" size="sm" onClick={() => saveDueDate(task.uuid)}>
+                                  Save
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={cancelEdit}>
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                <span className={isOverdue(task.due_date) && !task.completed ? "text-destructive" : ""}>
+                                  Due: {formatDate(task.due_date)}
+                                </span>
+                                <Button variant="ghost" size="icon" onClick={() => startEditing(task.uuid, task.due_date)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeTask(task.uuid)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
