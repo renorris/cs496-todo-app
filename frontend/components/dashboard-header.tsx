@@ -13,6 +13,7 @@ import {
 import { Bell, LogOut, Plus, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/authcontext"
+import { ThemeSwitcherButton } from '@/components/ThemeSwitcherButton';
 
 export function DashboardHeader() {
   const router = useRouter()
@@ -40,6 +41,7 @@ export function DashboardHeader() {
               </DropdownMenuLabel>
             </DropdownMenuContent>
           </DropdownMenu>
+          <ThemeSwitcherButton />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
