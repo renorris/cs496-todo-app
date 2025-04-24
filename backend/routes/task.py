@@ -134,7 +134,6 @@ def update_task(list_uuid: uuid.UUID, task_uuid: uuid.UUID, reqBody: UpdateTaskB
     if reqBody.done is not None:
         task.done = reqBody.done
     
-    session.add(task)
     session.commit()
     session.refresh(task)
     
